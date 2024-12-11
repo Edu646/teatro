@@ -1,0 +1,14 @@
+{
+    "name": "asus/prueba_teatrillo",
+    "autoload": {
+        "psr-4": {
+            "App\\": "App/",
+            "Controllers\\": "Controllers",
+            "Lib\\": "Lib",
+            "Models\\": "Models",
+            "View\\": "View",
+            "config\\": "config"
+        }
+    },
+    "require": {}
+}

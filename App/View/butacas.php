@@ -1,73 +1,91 @@
+<?php
+
+use App\Lib\BaseDatos;
+
+require __DIR__ . '/../Lib/BaseDatos.php';
+
+// Instanciar la clase BaseDatos
+$baseDatos = new \App\Lib\BaseDatos();
+
+// Obtener la conexión a la base de datos
+$conexion = $baseDatos->getConnection();
+
+// Consulta para obtener todas las butacas
+$stmt = $conexion->prepare("SELECT * FROM butacas ORDER BY fila, columna");
+$stmt->execute();
+$butacas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Distribución de Butacas</title>
+    <title>Reserva de Butacas</title>
     <style>
-        .butaca {
-            width: 30px;
-            height: 30px;
-            margin: 2px;
-            text-align: center;
-            line-height: 30px;
-            font-size: 12px;
-            font-weight: bold;
-            border: 1px solid #000;
-            display: inline-block;
-            cursor: pointer;
+        table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            width: 80%;
         }
-        .disponible { background-color: green; }
-        .reservada { background-color: grey; cursor: not-allowed; }
-        .seleccionada { background-color: red; }
+        th, td {
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            vertical-align: middle;
+            border: 1px solid #000;
+        }
+        .libre {
+            background-color: #a8e6cf;
+        }
+        .ocupada {
+            background-color: #ff8b94;
+        }
+        .reservada {
+            background-color: #ffd3b6;
+        }
+        th {
+            background-color: #d3d3d3;
+        }
     </style>
 </head>
 <body>
-    <h1>Distribución de Butacas</h1>
+    <h1>Bienvenido al Teatro IES Francisco Ayala</h1>
+   
+    <p>¿Desea reservar ahora sus butacas? 
+        <a href="<?= BASE_URL ?>/views/reservas/reserva.php">Reserva</a>
+    </p>
+    
+    <h2>Escenario:</h2>
+    <table>
+        <thead>
+            <tr>
+                <th></th> <!-- Celda vacía en la esquina superior izquierda -->
+                <?php for ($col = 1; $col <= 10; $col++): ?>
+                    <th><?= $col ?></th>
+                <?php endfor; ?>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            // Reorganizar los datos por fila y columna
+            $butacasPorFila = [];
+            foreach ($butacas as $butaca) {
+                $butacasPorFila[$butaca['fila']][$butaca['columna']] = $butaca['estado'];
+            }
 
-    <form id="reserva-form" method="POST" action="index.php?action=procesarReserva">
-        <?php $butacas = isset($butacas) && is_array($butacas) ? $butacas : []; ?>
-        <pre><?php print_r($butacas); ?></pre>
-        <div style="display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px;">
-            <?php foreach ($butacas as $butaca): ?>
-                <?php
-                    $class = 'disponible';
-                    if ($butaca['estado'] === 'reservada') {
-                        $class = 'reservada';
-                    }
-                ?>
-                <div class="butaca <?= $class ?>" 
-                     data-id="<?= $butaca['id'] ?>" 
-                     <?= $class === 'reservada' ? 'disabled' : '' ?>>
-                    <?= $butaca['fila'] . $butaca['numero'] ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
-        <input type="hidden" name="butacas[]" id="butacas">
-        <button type="submit" style="margin-top: 20px;">Reservar</button>
-    </form>
-
-    <script>
-        const butacas = document.querySelectorAll('.butaca.disponible');
-        const form = document.getElementById('reserva-form');
-        const butacasInput = document.getElementById('butacas');
-        let seleccionadas = [];
-
-        butacas.forEach(butaca => {
-            butaca.addEventListener('click', () => {
-                const id = butaca.getAttribute('data-id');
-                if (seleccionadas.includes(id)) {
-                    seleccionadas = seleccionadas.filter(item => item !== id);
-                    butaca.classList.remove('seleccionada');
-                } else if (seleccionadas.length < 5) {
-                    seleccionadas.push(id);
-                    butaca.classList.add('seleccionada');
-                } else {
-                    alert('No puedes seleccionar más de 5 butacas.');
+            // Renderizar las filas
+            for ($fila = 1; $fila <= 10; $fila++) {
+                echo '<tr>';
+                echo "<th>$fila</th>"; // Número de la fila
+                for ($columna = 1; $columna <= 10; $columna++) {
+                    $estado = $butacasPorFila[$fila][$columna] ?? 'libre'; // Estado o 'libre' si no existe
+                    echo "<td class='$estado'></td>";
                 }
-                butacasInput.value = seleccionadas.join(',');
-            });
-        });
-    </script>
+                echo '</tr>';
+            }
+            ?>
+        </tbody>
+    </table>
 </body>
 </html>

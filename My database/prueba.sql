@@ -15,6 +15,7 @@ CREATE TABLE reservas (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
     FOREIGN KEY (butaca_id) REFERENCES butacas(id)
 );
+drop table butacas;
 CREATE TABLE butacas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero INT NOT NULL,
@@ -22,7 +23,13 @@ CREATE TABLE butacas (
     estado ENUM('disponible', 'reservada') DEFAULT 'disponible'
 );
 ALTER TABLE usuarios
+
+insert into butacas (fila , )
 ADD COLUMN password VARCHAR(255) NOT NULL;
+
+use centro_educativo;
+ALTER TABLE butacas DELETE numero INT;
+
 
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
